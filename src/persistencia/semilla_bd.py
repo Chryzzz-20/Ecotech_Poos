@@ -3,6 +3,8 @@ from dominio.empleado import Empleado
 from persistencia.crear_bd import crear_tablas
 from persistencia.departamento_dao import DepartamentoDAO
 from persistencia.empleado_dao import EmpleadoDAO
+from persistencia.usuario_dao import UsuarioDAO
+from servicios.autenticacion import registrar_usuario
 
 # Datos ficticios. El nombre identifica al departamento y el correo al empleado,
 # así la semilla puede ejecutarse varias veces sin duplicar registros.
@@ -90,11 +92,30 @@ def asignar_gerentes(ids_departamentos):
             print(f"Gerente de {nombre_depto}: {gerente.nombre}")
 
 
+def cargar_usuario_admin():
+    # Asociamos el usuario admin al primer empleado creado (Ana Torres, ID 1 por ejemplo)
+    empleado_id_admin = 1 
+    nombre_admin = "admin"
+    clave_admin = "admin123"
+    
+    try:
+        usuario_existente = UsuarioDAO.buscar_por_nombre(nombre_admin)
+        if usuario_existente is None:
+            registrar_usuario(empleado_id_admin, nombre_admin, clave_admin)
+            print(f"-> Usuario administrador '{nombre_admin}' creado exitosamente.")
+        else:
+            print(f"-> El usuario administrador '{nombre_admin}' ya existe. No se duplicó.")
+    except Exception as e:
+        print(f"Error al crear el usuario administrador: {e}")
+
+
 def cargar_semilla():
     crear_tablas()
     ids_departamentos = cargar_departamentos()
     creados = cargar_empleados(ids_departamentos)
     asignar_gerentes(ids_departamentos)
+    cargar_usuario_admin()  # <-- Aquí integramos la seguridad
+    
     print(f"\nEmpleados nuevos en esta ejecución: {creados}")
     print(f"Total departamentos: {len(DepartamentoDAO.listar_todos())}")
     print(f"Total empleados: {len(EmpleadoDAO.listar_todos())}")
@@ -102,3 +123,5 @@ def cargar_semilla():
 
 if __name__ == "__main__":
     cargar_semilla()
+
+    

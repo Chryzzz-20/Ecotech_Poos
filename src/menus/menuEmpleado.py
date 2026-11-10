@@ -7,6 +7,14 @@ from persistencia.registroTiempo_dao import RegistroTiempoDAO
 from persistencia.usuario_dao import UsuarioDAO
 from dominio.empleado import Empleado
 
+def pedir_dato(mensaje, validador):
+    while True:
+        try:
+            entrada = input(mensaje)
+            return validador(entrada)
+        except (TypeError, ValueError) as error:
+            print(f"{error} Intenta nuevamente.")
+
 def a_entero_positivo(valor):
     try:
         numero = int(valor)
@@ -105,7 +113,7 @@ def quitar_gerencias(id_empleado, excepto=None):
             print(f"El departamento '{departamento.nombre}' quedó sin gerente")
 
 def ingresar_datos(id_actual=None):
-    nombre = pedir_texto("\nNombre: ")
+    nombre = pedir_dato("\nNombre: ", Empleado.validar_nombre)
     direccion = pedir_direccion("Dirección (calle y número): ")
     telefono = pedir_telefono("Teléfono: ")
     correo = pedir_correo("Correo: ", id_actual)

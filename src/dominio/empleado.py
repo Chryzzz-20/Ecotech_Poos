@@ -1,3 +1,6 @@
+from dominio import usuario
+
+
 class Empleado:
     MIN_NOMBRE = 2
     MAX_NOMBRE = 100
@@ -27,7 +30,7 @@ class Empleado:
                 f"Salario: {self.salario} | Inicio contrato: {self.inicioContrato} | "
                 f"Departamento: {self.id_departamento if self.id_departamento is not None else 'Sin departamento'}")
 
-     @classmethod
+    @classmethod
     def validar_nombre(cls, nombre):
         if not isinstance(nombre, str):
             raise TypeError("El nombre debe ser texto.")
@@ -40,4 +43,22 @@ class Empleado:
                 f"y {cls.MAX_NOMBRE} caracteres."
             )
            
-            return nombre
+        return nombre
+    
+    @classmethod
+    def validar_correo(cls, correo):
+        if not isinstance(correo, str):
+            raise TypeError("El correo debe ser texto.")
+        correo = correo.strip()
+        if not cls.MIN_CORREO <= len(correo) <= cls.MAX_CORREO:
+            raise ValueError("Correo fuera del largo permitido.")
+        if any(c.isspace() for c in correo):
+            raise ValueError("El correo no debe contener espacios.")
+        if correo.count("@") != 1:
+            raise ValueError("El correo debe contener un solo @.")
+        usuario, dominio = correo.split("@")
+        if not usuario or "." not in dominio:
+            raise ValueError("Use un correo como nombre@empresa.cl.")
+        if any(not parte for parte in dominio.split(".")):
+            raise ValueError("El dominio contiene puntos inválidos.")
+        return correo

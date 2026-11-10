@@ -1,11 +1,33 @@
 import sys
+import getpass
+
 from getpass import getpass
 from dominio.usuario import Usuario
 from persistencia.usuario_dao import UsuarioDAO
 from persistencia.empleado_dao import EmpleadoDAO
 from menus.menuEmpleado import pedir_texto, a_entero_positivo
+from entradas import pedir_dato
+from servicios.autenticacion import registrar_usuario
+from domino.usuario import Usuario
 
 ROLES = ("administrador", "empleado")
+
+def solicitar_registro():
+    try:
+        empleado_id = pedir_dato("ID del empleado: ", int)
+        nombre = pedir_dato("Nuevo usuario: ", Usuario.normalizar_usuario)
+        clave = pedir_dato("Contraseña: ", Usuario.validar_clave, getpass)
+        if clave != getpass("Repita la contraseña: "):
+            print("Las contraseñas no coinciden. Vuelva al registro.")
+            return None
+        
+        usuario_id = registrar_usuario(empleado_id, nombre, clave)
+    except (TypeError, ValueError) as error:
+        print(error)
+        return None
+    
+    print(f"Cuenta creada correctamente. ID: {usuario_id}")
+    return usuario_id
 
 def pedir_contraseña(mensaje):
     if sys.stdin.isatty():
@@ -142,3 +164,47 @@ def listar_usuarios():
     for usuario in usuarios:
         empleado = "Ninguno" if usuario.id_empleado is None else usuario.id_empleado
         print(f"\nId {usuario.id}, Nombre {usuario.nombre}, Rol {usuario.rol}, Empleado {empleado}")
+
+def mostrar_perfil(usuario_actual):
+    if usuario_actual is None:
+        print("Inicie sesión para ver el perfil.")
+        return
+    print(f"Usuario: {usuario_actual['nombre_usuario']}")
+    print(f"Empleado: {usuario_actual['empleado_id']}")
+
+def consultar_indicador(usuario_actual):
+    if usuario_actual is None:
+        print("Inicie sesión para consultar indicadores.")
+        return
+    mostrar_indicador()
+
+def menu_privado(usuario_actual):
+    if usuario_actual is None:
+        print("Debe iniciar sesión.")
+        return "9"
+    while True:
+        # 1. Menú según el rol (tal como viene en el PPT)
+        print("1. Mi ficha  2. Mis registros  3. Consultar API")
+        if usuario_actual.get("rol") == "admin":
+            print("4. Administrar empleados")
+        print("9. Cerrar sesión  0. Salir")
+        
+        opcion = input("Opción: ").strip()
+        if opcion in ("0", "9"):
+            return opcion
+            
+        # 2. Despacho de la opción 4 protegido con try-except (según el PPT)
+        if opcion == "4":
+            try:
+                empleados = listar_todos(usuario_actual)
+                for empleado in empleados:
+                    print(empleado)
+            except PermissionError as error:
+                print(error)
+        elif opcion == "1":
+            mostrar_perfil(usuario_actual)
+        elif opcion == "3":
+            consultar_indicador(usuario_actual)
+        else:
+            print("Opción no válida.")
+

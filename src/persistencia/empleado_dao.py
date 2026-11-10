@@ -98,3 +98,12 @@ class EmpleadoDAO(BaseDAO):
         if not empleados:
             return None
         return empleados[0]
+    
+    @classmethod
+    def buscar_por_id(cls, id_empleado):
+        empleados = cls._listar_donde(
+            "id = ?", (id_empleado,), "buscar el empleado por ID"
+        )
+        if not empleados:
+            return None
+        return empleados[0]

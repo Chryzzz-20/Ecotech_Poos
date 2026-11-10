@@ -77,7 +77,8 @@ def crear_tablas():
                 id_empleado INTEGER,
                 nombre TEXT NOT NULL,
                 contraseña TEXT NOT NULL,
-                rol TEXT NOT NULL,
+                rol TEXT NOT NULL,rol TEXT NOT NULL DEFAULT 'empleado'
+                CHECK (rol IN ('admin', 'empleado'))
                 FOREIGN KEY (id_empleado) REFERENCES empleado(id)
             )""",
         ]
